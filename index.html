@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Entraîneur de poker Texas Hold'em No-Limit — argent 100 % virtuel, aucun jeu d'argent réel.">
+  <meta name="theme-color" content="#0b1016">
+  <title>Poker Académie — Entraînement Texas Hold'em</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       EN-TÊTE : marque, navigation principale, indicateur de sauvegarde
+       ==================================================================== -->
+  <header class="app-header">
+    <div class="brand" aria-label="Poker Académie">
+      <span class="brand-logo" aria-hidden="true">♠</span>
+      <span class="brand-name">Poker Académie</span>
+    </div>
+
+    <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+      <button type="button" class="nav-btn active" data-view="home" aria-current="page"><span class="nav-ico" aria-hidden="true">⌂</span><span class="nav-label">Accueil</span></button>
+      <button type="button" class="nav-btn" data-view="learn"><span class="nav-ico" aria-hidden="true">✎</span><span class="nav-label">Apprentissage</span></button>
+      <button type="button" class="nav-btn" data-view="game"><span class="nav-ico" aria-hidden="true">♣</span><span class="nav-label">Jeu</span></button>
+      <button type="button" class="nav-btn" data-view="stats"><span class="nav-ico" aria-hidden="true">▤</span><span class="nav-label">Statistiques</span></button>
+      <button type="button" class="nav-btn" data-view="bankroll"><span class="nav-ico" aria-hidden="true">◎</span><span class="nav-label">Bankroll</span></button>
+      <button type="button" class="nav-btn" data-view="history"><span class="nav-ico" aria-hidden="true">↺</span><span class="nav-label">Historique</span></button>
+      <button type="button" class="nav-btn" data-view="settings"><span class="nav-ico" aria-hidden="true">⚙</span><span class="nav-label">Réglages</span></button>
+    </nav>
+
+    <div class="header-right">
+      <div class="header-bankroll" title="Bankroll virtuelle">
+        <span class="chip-ico" aria-hidden="true"></span>
+        <span id="header-bankroll">—</span>
+      </div>
+      <div class="save-status" id="save-status" data-status="idle" role="status" aria-live="polite">
+        <span class="save-dot" aria-hidden="true"></span>
+        <span id="save-status-text">Prêt</span>
+      </div>
+      <div class="sync-badge hidden" id="sync-badge" data-status="off" role="status" aria-live="polite" title="Synchronisation entre appareils"></div>
+    </div>
+  </header>
+
+  <!-- Rappel permanent : argent virtuel uniquement -->
+  <div class="virtual-banner" role="note">
+    Jeu d'entraînement — <strong>argent 100 % virtuel</strong>. Aucun dépôt, retrait, achat ni pari réel n'est possible.
+  </div>
+
+  <noscript>
+    <div class="noscript-msg">Cette application nécessite JavaScript. Activez-le dans votre navigateur puis rechargez la page.</div>
+  </noscript>
+
+  <main class="app-main" id="app-main">
+
+    <!-- ==================================================================
+         VUE : ACCUEIL
+         ================================================================== -->
+    <section class="view active" id="view-home" data-view="home" aria-labelledby="home-title">
+      <div class="home-hero">
+        <h1 id="home-title">Bienvenue<span id="home-player-name"></span></h1>
+        <p class="hero-sub">Apprenez le Texas Hold'em No-Limit pas à pas, entraînez-vous contre des adversaires virtuels et suivez vos progrès.</p>
+        <div class="hero-actions">
+          <button type="button" class="btn btn-primary btn-lg hidden" id="btn-resume-game">▶ Reprendre la partie en cours</button>
+          <button type="button" class="btn btn-accent btn-lg" id="btn-new-game">Nouvelle partie</button>
+          <button type="button" class="btn btn-ghost btn-lg" id="btn-home-learn">Continuer l'apprentissage</button>
+          <button type="button" class="btn btn-ghost btn-lg" id="btn-home-challenge">Lancer un défi</button>
+        </div>
+        <p class="resume-info hidden" id="home-resume-info"></p>
+      </div>
+
+      <div class="tile-grid">
+        <article class="tile">
+          <h2 class="tile-title">Niveau actuel</h2>
+          <p class="tile-value" id="home-level">—</p>
+          <div class="progress" aria-hidden="true"><div class="progress-bar" id="home-progress-bar" style="width:0%"></div></div>
+          <p class="tile-note" id="home-progress-text">—</p>
+        </article>
+        <article class="tile">
+          <h2 class="tile-title">Bankroll virtuelle</h2>
+          <p class="tile-value" id="home-bankroll">—</p>
+          <p class="tile-note" id="home-bankroll-net">—</p>
+        </article>
+        <article class="tile">
+          <h2 class="tile-title">Mains jouées</h2>
+          <p class="tile-value" id="home-hands">—</p>
+          <p class="tile-note" id="home-winrate">—</p>
+        </article>
+        <article class="tile">
+          <h2 class="tile-title">Badge</h2>
+          <p class="tile-value" id="home-badge">—</p>
+          <p class="tile-note" id="home-badge-next">—</p>
+        </article>
+      </div>
+
+      <div class="alert-list" id="home-alerts" aria-live="polite"></div>
+
+      <div class="panel">
+        <h2 class="panel-title">Par où commencer ?</h2>
+        <ol class="steps-list">
+          <li><strong>Apprentissage</strong> — suivez les leçons du niveau 1 (règles, ordre des mains, positions) puis validez le quiz.</li>
+          <li><strong>Jeu</strong> — lancez une table de Cash Game contre des bots « Débutant » avec les conseils activés.</li>
+          <li><strong>Analyse</strong> — après chaque main, cliquez sur « Analyser ma main » pour comprendre vos décisions.</li>
+          <li><strong>Statistiques</strong> — suivez votre VPIP, votre PFR et vos erreurs les plus fréquentes.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : APPRENTISSAGE (leçons, défis, glossaire)
+         ================================================================== -->
+    <section class="view" id="view-learn" data-view="learn" aria-labelledby="learn-title">
+      <div class="view-head">
+        <h1 id="learn-title">Apprentissage</h1>
+        <div class="subtabs" role="tablist" aria-label="Sections d'apprentissage">
+          <button type="button" class="subtab active" role="tab" aria-selected="true" data-learn-tab="lessons">Leçons</button>
+          <button type="button" class="subtab" role="tab" aria-selected="false" data-learn-tab="challenges">Défis</button>
+          <button type="button" class="subtab" role="tab" aria-selected="false" data-learn-tab="glossary">Glossaire</button>
+        </div>
+      </div>
+
+      <!-- Leçons : liste des niveaux à gauche, contenu à droite -->
+      <div class="learn-panel active" id="learn-lessons" role="tabpanel">
+        <div class="learn-layout">
+          <aside class="learn-sidebar" id="learn-levels" aria-label="Niveaux et leçons"></aside>
+          <article class="learn-content panel" id="learn-content" aria-live="polite">
+            <p class="muted">Choisissez une leçon dans la liste pour commencer.</p>
+          </article>
+        </div>
+      </div>
+
+      <!-- Défis : quiz et scénarios de décision -->
+      <div class="learn-panel" id="learn-challenges" role="tabpanel">
+        <div class="panel">
+          <h2 class="panel-title">Mode Défi</h2>
+          <p class="muted">Des situations de décision et des questions de poker, du pré-flop à la river. Choisissez un thème ou laissez le hasard décider.</p>
+          <div class="chip-row" id="challenge-themes"></div>
+          <div class="challenge-score" id="challenge-score"></div>
+        </div>
+        <article class="panel" id="challenge-content" aria-live="polite">
+          <p class="muted">Sélectionnez un thème pour lancer un défi.</p>
+        </article>
+      </div>
+
+      <!-- Glossaire -->
+      <div class="learn-panel" id="learn-glossary" role="tabpanel">
+        <div class="panel">
+          <h2 class="panel-title">Glossaire du poker</h2>
+          <label class="field">
+            <span class="field-label">Rechercher un terme</span>
+            <input type="search" id="glossary-search" placeholder="Ex. : pot odds, VPIP, c-bet…" autocomplete="off">
+          </label>
+          <dl class="glossary" id="glossary-list"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : JEU (configuration de la table, puis table)
+         ================================================================== -->
+    <section class="view" id="view-game" data-view="game" aria-labelledby="game-title">
+
+      <!-- ---------- Configuration d'une nouvelle partie ---------- -->
+      <div id="game-setup">
+        <div class="view-head">
+          <h1 id="game-title">Nouvelle partie</h1>
+          <button type="button" class="btn btn-primary hidden" id="btn-setup-resume">▶ Reprendre la partie en cours</button>
+        </div>
+
+        <form class="panel setup-form" id="setup-form" novalidate>
+          <div class="form-grid">
+            <label class="field">
+              <span class="field-label">Mode de jeu</span>
+              <select id="cfg-mode">
+                <option value="cash">Cash Game — blinds fixes, sortie libre</option>
+                <option value="learning">Apprentissage — conseils et explications</option>
+                <option value="sng">Sit &amp; Go — petit tournoi rapide</option>
+                <option value="tournament">Tournoi — blinds croissantes, éliminations</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Nombre de joueurs</span>
+              <select id="cfg-players">
+                <option value="2">2 (heads-up)</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6" selected>6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9 (table pleine)</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Niveau des adversaires</span>
+              <select id="cfg-bot-level">
+                <option value="debutant">Débutant — passif, beaucoup d'erreurs</option>
+                <option value="intermediaire">Intermédiaire — « ABC poker »</option>
+                <option value="avance">Avancé — position, c-bet, bluffs</option>
+                <option value="expert">Expert simulé — s'adapte à votre jeu</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Vitesse de jeu</span>
+              <select id="cfg-speed">
+                <option value="normal">Normale</option>
+                <option value="fast">Rapide</option>
+              </select>
+            </label>
+
+            <label class="field hidden" id="field-buyin">
+              <span class="field-label">Buy-in du tournoi</span>
+              <select id="cfg-buyin">
+                <option value="100">100</option>
+                <option value="500" selected>500</option>
+                <option value="1000">1 000</option>
+                <option value="5000">5 000</option>
+              </select>
+            </label>
+
+            <label class="field" id="field-blinds">
+              <span class="field-label">Blinds (petite / grosse)</span>
+              <select id="cfg-blinds">
+                <option value="1/2">1 / 2</option>
+                <option value="2/5">2 / 5</option>
+                <option value="5/10" selected>5 / 10</option>
+                <option value="10/20">10 / 20</option>
+                <option value="25/50">25 / 50</option>
+                <option value="50/100">50 / 100</option>
+                <option value="100/200">100 / 200</option>
+              </select>
+            </label>
+
+            <label class="field" id="field-stack">
+              <span class="field-label">Stack de départ</span>
+              <select id="cfg-stack">
+                <option value="40">40 grosses blinds (court)</option>
+                <option value="100" selected>100 grosses blinds (standard)</option>
+                <option value="200">200 grosses blinds (profond)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="cfg-hints" checked>
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Conseils en temps réel</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="cfg-review" checked>
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Révision après chaque main</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="cfg-freeroll">
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Freeroll (entrée gratuite, bankroll non touchée)</span>
+            </label>
+          </div>
+
+          <div class="setup-summary" id="cfg-summary" aria-live="polite"></div>
+          <p class="form-error hidden" id="cfg-error" role="alert"></p>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-accent btn-lg" id="btn-start-game">S'asseoir à la table</button>
+          </div>
+        </form>
+
+        <div class="panel info-panel">
+          <h2 class="panel-title">Quel mode choisir ?</h2>
+          <ul class="bullet-list">
+            <li><strong>Sit &amp; Go</strong> : petit tournoi rapide. Chacun reçoit 1 500 jetons, les blinds montent toutes les 6 mains, un joueur sans jetons est éliminé. Les premiers se partagent les buy-ins.</li>
+            <li><strong>Tournoi</strong> : même principe, en plus long : 3 000 jetons, blinds qui montent toutes les 10 mains. Pas de recave ; la table affiche la valeur ICM de votre stack.</li>
+            <li><strong>Cash Game</strong> : blinds fixes, buy-in virtuel prélevé sur votre bankroll, vous pouvez quitter la table entre deux mains et encaisser vos jetons.</li>
+            <li><strong>Freeroll</strong> : entrée gratuite, en cash game comme en tournoi. Les jetons de la table ne viennent pas de votre bankroll et n'y retournent pas (aucun prix en tournoi) ; idéal pour s'entraîner sans conséquence. En cash game, les statistiques sont comptées à part.</li>
+            <li><strong>Apprentissage</strong> : une table de cash en freeroll avec conseils et explications toujours activés.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ---------- Table de jeu ---------- -->
+      <div id="game-table" class="hidden">
+        <div class="table-topbar">
+          <div class="table-info" id="table-info">
+            <span class="tag" id="table-mode">—</span>
+            <span class="tag" id="table-blinds">—</span>
+            <span class="tag" id="table-hand-number">—</span>
+            <span class="tag" id="table-bot-level">—</span>
+            <span class="tag tag-accent hidden" id="table-tournament"></span>
+            <span class="tag hidden" id="table-icm" title="Valeur estimée de votre stack en prix (modèle ICM)"></span>
+          </div>
+          <div class="table-tools">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-hints" aria-pressed="true">Conseils : oui</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-rebuy">Recaver</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-leave-table">Quitter la table</button>
+          </div>
+        </div>
+
+        <div class="table-layout">
+          <div class="table-column">
+            <!-- Tapis : les sièges sont générés par game/app.js dans #seats -->
+            <div class="poker-table" id="poker-table">
+              <div class="table-felt">
+                <div class="table-center">
+                  <div class="pot-display" aria-live="polite">
+                    <span class="pot-label">Pot</span>
+                    <span class="pot-amount" id="pot-amount">0</span>
+                  </div>
+                  <div class="side-pots" id="side-pots"></div>
+                  <div class="board" id="board" aria-label="Cartes communes">
+                    <div class="card empty"></div>
+                    <div class="card empty"></div>
+                    <div class="card empty"></div>
+                    <div class="card empty"></div>
+                    <div class="card empty"></div>
+                  </div>
+                  <div class="street-label" id="street-label"></div>
+                </div>
+              </div>
+              <div class="seats" id="seats"></div>
+            </div>
+
+            <!-- Message de résultat de la main -->
+            <div class="hand-result hidden" id="hand-result" role="status" aria-live="polite"></div>
+
+            <!-- Conseil en temps réel -->
+            <aside class="hint-panel hidden" id="hint-panel" aria-live="polite">
+              <div class="hint-head">
+                <span class="hint-ico" aria-hidden="true">💡</span>
+                <strong id="hint-title">Conseil</strong>
+              </div>
+              <div class="hint-body" id="hint-body"></div>
+            </aside>
+
+            <!-- Barre d'actions du joueur -->
+            <div class="action-bar hidden" id="action-bar">
+              <div class="bet-controls" id="bet-controls">
+                <div class="bet-presets" id="bet-presets">
+                  <button type="button" class="btn btn-chip bet-preset" data-preset="min">Min</button>
+                  <button type="button" class="btn btn-chip bet-preset" data-preset="0.33">⅓ pot</button>
+                  <button type="button" class="btn btn-chip bet-preset" data-preset="0.5">½ pot</button>
+                  <button type="button" class="btn btn-chip bet-preset" data-preset="0.75">¾ pot</button>
+                  <button type="button" class="btn btn-chip bet-preset" data-preset="1">Pot</button>
+                </div>
+                <div class="bet-slider-row">
+                  <input type="range" id="bet-slider" min="0" max="100" step="1" value="0" aria-label="Montant de la mise">
+                  <input type="number" id="bet-amount" inputmode="numeric" min="0" step="1" value="0" aria-label="Montant exact">
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button type="button" class="btn btn-action btn-fold" id="btn-fold">Se coucher</button>
+                <button type="button" class="btn btn-action btn-check" id="btn-check">Parole</button>
+                <button type="button" class="btn btn-action btn-call" id="btn-call">Suivre</button>
+                <button type="button" class="btn btn-action btn-raise" id="btn-bet">Miser</button>
+                <button type="button" class="btn btn-action btn-allin" id="btn-allin">Tapis</button>
+              </div>
+            </div>
+
+            <!-- Barre de fin de main -->
+            <div class="handover-bar hidden" id="handover-bar">
+              <button type="button" class="btn btn-accent" id="btn-next-hand">Main suivante</button>
+              <button type="button" class="btn btn-primary" id="btn-analyze">Analyser ma main</button>
+              <button type="button" class="btn btn-ghost" id="btn-replay">Rejouer la main</button>
+            </div>
+
+            <p class="waiting-msg hidden" id="waiting-msg" aria-live="polite"></p>
+
+            <!-- Résultat final d'un tournoi -->
+            <div class="panel tournament-panel hidden" id="tournament-panel" aria-live="polite"></div>
+          </div>
+
+          <!-- Journal de la main -->
+          <aside class="log-column panel" aria-label="Historique de la main">
+            <h2 class="panel-title">Déroulement de la main</h2>
+            <ol class="action-log" id="action-log"></ol>
+          </aside>
+        </div>
+
+        <!-- Analyse post-main -->
+        <article class="panel analysis-panel hidden" id="analysis-panel" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : STATISTIQUES
+         ================================================================== -->
+    <section class="view" id="view-stats" data-view="stats" aria-labelledby="stats-title">
+      <div class="view-head">
+        <h1 id="stats-title">Statistiques</h1>
+        <div class="filters">
+          <label class="field field-inline">
+            <span class="field-label">Mode</span>
+            <select id="stats-filter-mode">
+              <option value="all">Tous</option>
+              <option value="cash">Cash Game</option>
+              <option value="freeroll">Freeroll</option>
+              <option value="learning">Apprentissage</option>
+              <option value="sng">Sit &amp; Go</option>
+              <option value="tournament">Tournoi</option>
+            </select>
+          </label>
+          <label class="field field-inline">
+            <span class="field-label">Adversaires</span>
+            <select id="stats-filter-level">
+              <option value="all">Tous</option>
+              <option value="debutant">Débutant</option>
+              <option value="intermediaire">Intermédiaire</option>
+              <option value="avance">Avancé</option>
+              <option value="expert">Expert simulé</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Progression</h2>
+        <div class="level-progress">
+          <div>
+            <p class="tile-value" id="stats-level">—</p>
+            <p class="tile-note" id="stats-level-note">—</p>
+          </div>
+          <div class="progress progress-lg" aria-hidden="true"><div class="progress-bar" id="stats-progress-bar" style="width:0%"></div></div>
+        </div>
+        <div class="badge-row" id="stats-badges"></div>
+      </div>
+
+      <div class="stat-grid" id="stats-grid"></div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h2 class="panel-title">Évolution du résultat (en grosses blinds)</h2>
+          <div class="chart-wrap">
+            <svg class="chart" id="stats-chart" viewBox="0 0 600 240" preserveAspectRatio="none" role="img" aria-label="Courbe du résultat cumulé"></svg>
+          </div>
+          <p class="muted chart-empty hidden" id="stats-chart-empty">Jouez quelques mains pour voir votre courbe.</p>
+        </div>
+        <div class="panel">
+          <h2 class="panel-title">Répartition de vos actions</h2>
+          <div class="bars" id="stats-actions"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h2 class="panel-title">Erreurs les plus fréquentes</h2>
+          <ul class="rank-list" id="stats-errors"></ul>
+        </div>
+        <div class="panel">
+          <h2 class="panel-title">Thèmes maîtrisés et à revoir</h2>
+          <div id="stats-themes"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Diagnostic de votre jeu</h2>
+        <ul class="diagnosis" id="stats-diagnosis"></ul>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Graphiques avancés</h2>
+        <p class="muted" id="stats-advanced-note"></p>
+        <div class="two-col">
+          <div>
+            <h3>Résultat par position (BB/100)</h3>
+            <div class="chart-wrap"><svg class="chart" id="stats-chart-position" viewBox="0 0 600 240" preserveAspectRatio="none" role="img" aria-label="Résultat par position"></svg></div>
+            <p class="muted">Les positions de fin de parole (CO, BTN) sont normalement les plus rentables ; les blinds, les moins.</p>
+          </div>
+          <div>
+            <h3>Avec et sans abattage (BB cumulées)</h3>
+            <div class="chart-wrap"><svg class="chart" id="stats-chart-lines" viewBox="0 0 600 240" preserveAspectRatio="none" role="img" aria-label="Gains avec et sans abattage"></svg></div>
+            <p class="chart-legend"><span class="lg-total">Total</span><span class="lg-sd">Mains allées à l'abattage</span><span class="lg-nsd">Mains sans abattage</span></p>
+          </div>
+        </div>
+        <h3>Résultat par main de départ</h3>
+        <div class="heat-grid" id="stats-heat"></div>
+        <p class="muted">Vert : main gagnante en moyenne ; rouge : perdante ; gris : jamais reçue. Survolez une case pour le détail. Paires sur la diagonale, mains assorties au-dessus, dépareillées en dessous.</p>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Résultats par catégorie</h2>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr><th>Catégorie</th><th>Mains</th><th>Gagnées</th><th>VPIP</th><th>PFR</th><th>BB/100</th><th>Net</th></tr>
+            </thead>
+            <tbody id="stats-breakdown"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Historique des sessions</h2>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr><th>Date</th><th>Mode</th><th>Table</th><th>Mains</th><th>Buy-ins</th><th>Cash-out / prix</th><th>Net</th></tr>
+            </thead>
+            <tbody id="stats-sessions"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel info-panel">
+        <h2 class="panel-title">Comment lire ces chiffres ?</h2>
+        <dl class="definitions">
+          <dt>VPIP</dt>
+          <dd>Pourcentage de mains où vous mettez volontairement de l'argent dans le pot avant le flop (les blinds obligatoires ne comptent pas).</dd>
+          <dt>PFR</dt>
+          <dd>Pourcentage de mains où vous relancez avant le flop.</dd>
+          <dt>BB/100</dt>
+          <dd>Gain ou perte moyenne, exprimé en grosses blinds, pour 100 mains jouées.</dd>
+          <dt>ROI virtuel</dt>
+          <dd>Résultat net divisé par le total de vos buy-ins virtuels.</dd>
+        </dl>
+        <p class="muted">Toutes ces statistiques sont calculées uniquement sur des mains terminées.</p>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : BANKROLL
+         ================================================================== -->
+    <section class="view" id="view-bankroll" data-view="bankroll" aria-labelledby="bankroll-title">
+      <div class="view-head">
+        <h1 id="bankroll-title">Bankroll virtuelle</h1>
+      </div>
+
+      <div class="two-col">
+        <div class="panel bankroll-main">
+          <p class="muted">Solde actuel</p>
+          <p class="bankroll-balance" id="bankroll-balance">—</p>
+          <p class="muted" id="bankroll-on-table"></p>
+          <div class="alert-list" id="bankroll-alerts" aria-live="polite"></div>
+        </div>
+
+        <form class="panel" id="deposit-form" novalidate>
+          <h2 class="panel-title">Ajouter de l'argent virtuel</h2>
+          <p class="muted">Gratuit et illimité : ce sont des jetons d'entraînement, sans aucune valeur réelle.</p>
+          <div class="chip-row">
+            <button type="button" class="btn btn-chip deposit-quick" data-amount="1000">+ 1 000</button>
+            <button type="button" class="btn btn-chip deposit-quick" data-amount="5000">+ 5 000</button>
+            <button type="button" class="btn btn-chip deposit-quick" data-amount="10000">+ 10 000</button>
+            <button type="button" class="btn btn-chip deposit-quick" data-amount="50000">+ 50 000</button>
+          </div>
+          <label class="field">
+            <span class="field-label">Montant personnalisé</span>
+            <input type="number" id="deposit-amount" inputmode="numeric" min="1" max="10000000" step="1" placeholder="Ex. : 2500">
+          </label>
+          <p class="form-error hidden" id="deposit-error" role="alert"></p>
+          <button type="submit" class="btn btn-accent">Créditer ma bankroll</button>
+        </form>
+      </div>
+
+      <div class="stat-grid" id="bankroll-summary"></div>
+
+      <div class="panel">
+        <h2 class="panel-title">Évolution de la bankroll</h2>
+        <div class="chart-wrap">
+          <svg class="chart" id="bankroll-chart" viewBox="0 0 600 240" preserveAspectRatio="none" role="img" aria-label="Courbe de la bankroll"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Historique des mouvements</h2>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr><th>Date</th><th>Type</th><th>Détail</th><th>Montant</th><th>Solde</th></tr>
+            </thead>
+            <tbody id="bankroll-transactions"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : HISTORIQUE DES MAINS
+         ================================================================== -->
+    <section class="view" id="view-history" data-view="history" aria-labelledby="history-title">
+      <div class="view-head">
+        <h1 id="history-title">Historique des mains</h1>
+        <div class="filters">
+          <label class="field field-inline">
+            <span class="field-label">Afficher</span>
+            <select id="history-filter">
+              <option value="all">Toutes les mains</option>
+              <option value="won">Mains gagnées</option>
+              <option value="lost">Mains perdues</option>
+              <option value="showdown">Mains allées à l'abattage</option>
+              <option value="played">Mains où j'ai investi</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="history-layout">
+        <div class="panel history-list-panel">
+          <ul class="history-list" id="history-list"></ul>
+          <p class="muted hidden" id="history-empty">Aucune main enregistrée pour l'instant.</p>
+        </div>
+        <article class="panel history-detail" id="history-detail" aria-live="polite">
+          <p class="muted">Sélectionnez une main pour voir son déroulement, la rejouer ou l'analyser.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         VUE : RÉGLAGES
+         ================================================================== -->
+    <section class="view" id="view-settings" data-view="settings" aria-labelledby="settings-title">
+      <div class="view-head">
+        <h1 id="settings-title">Réglages</h1>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h2 class="panel-title">Profil et préférences</h2>
+          <label class="field">
+            <span class="field-label">Votre prénom ou pseudo</span>
+            <input type="text" id="set-name" maxlength="20" autocomplete="off" placeholder="Vous">
+          </label>
+          <label class="field">
+            <span class="field-label">Vitesse de jeu par défaut</span>
+            <select id="set-speed">
+              <option value="normal">Normale</option>
+              <option value="fast">Rapide</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Bankroll initiale (appliquée à la prochaine réinitialisation)</span>
+            <input type="number" id="set-initial-bankroll" inputmode="numeric" min="100" max="10000000" step="100">
+          </label>
+          <div class="toggle-col">
+            <label class="toggle">
+              <input type="checkbox" id="set-hints">
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Conseils en temps réel par défaut</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="set-review">
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Révision après chaque main par défaut</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="set-four-colors">
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span class="toggle-text">Jeu de cartes 4 couleurs (plus lisible)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">Sauvegarde</h2>
+          <p class="muted">Votre progression est enregistrée automatiquement dans ce navigateur. Exportez-la pour la conserver ou la transférer.</p>
+          <p class="muted" id="storage-info"></p>
+          <div class="btn-col">
+            <button type="button" class="btn btn-primary" id="btn-export">Exporter ma sauvegarde (JSON)</button>
+            <button type="button" class="btn btn-ghost" id="btn-import">Importer une sauvegarde…</button>
+            <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden" tabindex="-1" aria-hidden="true">
+          </div>
+
+          <h2 class="panel-title panel-title-spaced">Vérification du moteur</h2>
+          <p class="muted">Lance les tests intégrés (évaluateur de mains, side pots, anti-triche des bots).</p>
+          <button type="button" class="btn btn-ghost" id="btn-run-tests">Lancer les tests</button>
+          <pre class="tests-output hidden" id="tests-output" aria-live="polite"></pre>
+        </div>
+      </div>
+
+      <div class="panel" id="sync-panel">
+        <h2 class="panel-title">Synchronisation entre appareils</h2>
+        <p class="muted">Facultatif. Votre progression est copiée dans un fichier <strong>privé</strong> de votre compte GitHub, puis récupérée automatiquement sur vos autres appareils. Sans cette option, rien ne quitte ce navigateur.</p>
+        <p id="sync-state" class="sync-state" aria-live="polite"></p>
+
+        <div id="sync-off">
+          <ol class="steps-list">
+            <li>Connectez-vous à GitHub, puis ouvrez la page de création d'une clé d'accès : <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Poker%20Academie" target="_blank" rel="noopener noreferrer">github.com/settings/tokens/new</a>.</li>
+            <li>Vérifiez que seule la case <strong>gist</strong> est cochée, choisissez une durée de validité, puis cliquez sur « Generate token ».</li>
+            <li>Copiez la clé affichée (elle commence par <code>ghp_</code>) et collez-la ci-dessous. Faites de même, avec la même clé, sur chacun de vos appareils.</li>
+          </ol>
+          <label class="field">
+            <span class="field-label">Clé d'accès GitHub (droit « gist » uniquement)</span>
+            <input type="password" id="sync-token" autocomplete="off" spellcheck="false" placeholder="ghp_…">
+          </label>
+          <p class="form-error hidden" id="sync-error" role="alert"></p>
+          <button type="button" class="btn btn-accent" id="btn-sync-connect">Activer la synchronisation</button>
+          <p class="muted sync-note">La clé est enregistrée dans ce navigateur uniquement, jamais dans vos exports. Elle ne donne accès qu'à vos gists ; vous pouvez la révoquer à tout moment sur GitHub.</p>
+        </div>
+
+        <div id="sync-on" class="hidden">
+          <div class="btn-col">
+            <button type="button" class="btn btn-primary" id="btn-sync-now">Synchroniser maintenant</button>
+            <button type="button" class="btn btn-ghost" id="btn-sync-disconnect">Désactiver sur cet appareil</button>
+          </div>
+          <p class="muted sync-note">Attendez l'indication « Synchronisé » en haut de l'écran avant de fermer la page, puis ouvrez l'application sur l'autre appareil : la progression y est chargée au démarrage.</p>
+        </div>
+      </div>
+
+      <div class="panel danger-zone">
+        <h2 class="panel-title">Zone sensible</h2>
+        <p class="muted">Efface les leçons validées, les statistiques, l'historique, la bankroll et la partie en cours. Une double confirmation vous sera demandée.</p>
+        <button type="button" class="btn btn-danger" id="btn-reset-progress">Réinitialiser ma progression</button>
+      </div>
+
+      <p class="legal-note">Poker Académie est un outil pédagogique. Il ne propose aucun jeu d'argent réel et ne se connecte à aucun serveur.</p>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       FENÊTRE MODALE GÉNÉRIQUE (confirmations, rejeu, récupération)
+       ==================================================================== -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h2 id="modal-title"></h2>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- Notifications éphémères -->
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- ====================================================================
+       SCRIPTS — scripts classiques (pas de modules ES6) pour fonctionner
+       en file:// ; l'ordre de chargement est important.
+       ==================================================================== -->
+  <script src="poker.js"></script>
+  <script src="bots.js"></script>
+  <script src="stats.js"></script>
+  <script src="lessons.js"></script>
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
